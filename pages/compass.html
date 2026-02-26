@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>赛博罗盘 · 精准风水测算 - 国风玄易</title>
+    <style>
+        /* 全局变量与基础样式（复用首页变量，保持风格统一） */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "SimHei", "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+        :root {
+            /* 国风主色调 */
+            --color-black: #0a0a0a; /* 玄黑 */
+            --color-red: #c8102e; /* 朱砂红 */
+            --color-gold: #ffd700; /* 鎏金 */
+            --color-green: #228b22; /* 青黛绿 */
+            --color-blue: #1e90ff; /* 水蓝 */
+            --color-gray-light: #e0e0e0; /* 浅灰 */
+            --color-gray-dark: #333; /* 深灰 */
+            
+            /* 年轻模式变量 */
+            --font-size-base: 16px;
+            --font-size-title: 20px;
+            --font-size-subtitle: 18px;
+            --button-size: 44px;
+            --card-padding: 20px;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* 长辈模式变量 */
+            --elder-font-base: 32px;
+            --elder-font-title: 36px;
+            --elder-font-subtitle: 34px;
+            --elder-button-size: 80px;
+            --elder-card-padding: 35px;
+            --elder-border-radius: 20px;
+        }
+        .elder-mode {
+            --font-size-base: var(--elder-font-base);
+            --font-size-title: var(--elder-font-title);
+            --font-size-subtitle: var(--elder-font-subtitle);
+            --button-size: var(--elder-button-size);
+            --card-padding: var(--elder-card-padding);
+            --border-radius: var(--elder-border-radius);
+            --shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+        }
+        body {
+            background-color: var(--color-black);
+            color: #fff;
+            background-image: radial-gradient(circle at 50% 50%, rgba(200, 16, 46, 0.08) 0%, rgba(255, 215, 0, 0.05) 90%);
+            min-height: 100vh;
+            padding-bottom: 60px;
+            transition: var(--transition);
+        }
+
+        /* 国风装饰 - 动态线条背景 */
+        .bg-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.1;
+        }
+
+        /* 头部导航（返回+模式切换） */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 5%;
+            border-bottom: 2px solid rgba(200, 16, 46, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(200, 16, 46, 0.8);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: var(--font-size-base);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .back-btn:hover {
+            background: var(--color-gold);
+            color: var(--color-black);
+            transform: scale(1.05);
+        }
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+        .theme-switch, .voice-switch {
+            width: var(--button-size);
+            height: var(--button-size);
+            border: none;
+            border-radius: 50%;
+            background-color: rgba(200, 16, 46, 0.8);
+            color: #fff;
+            font-size: calc(var(--font-size-base) - 4px);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .theme-switch:hover, .voice-switch:hover {
+            background-color: var(--color-gold);
+            color: var(--color-black);
+            transform: scale(1.05);
+        }
+
+        /* 页面标题 */
+        .page-title {
+            text-align: center;
+            font-size: var(--font-size-title);
+            color: var(--color-gold);
+            margin: 30px 0;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 5;
+        }
+        .page-subtitle {
+            text-align: center;
+            font-size: var(--font-size-base);
+            color: var(--color-gray-light);
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 5;
+            line-height: 1.6;
+        }
+
+        /* 罗盘核心容器（更大尺寸，更精致边框） */
+        .compass-container {
+            width: 90%;
+            max-width: 650px;
+            height: 650px;
+            margin: 0 auto 50px;
+            position: relative;
+            z-index: 5;
+            border-radius: 50%;
+            padding: 10px;
+            background: linear-gradient(135deg, rgba(200, 16, 46, 0.2), rgba(255, 215, 0, 0.1));
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.15);
+        }
+        #compass-detail-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+        .compass-tip {
+            text-align: center;
+            font-size: var(--font-size-base);
+            color: var(--color-gray-light);
+            margin-top: 10px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* 风水结果卡片（大幅丰富内容） */
+        .fengshui-result {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto 50px;
+            padding: var(--card-padding);
+            background: linear-gradient(135deg, rgba(200, 16, 46, 0.15), rgba(255, 215, 0, 0.08));
+            border: 1px solid rgba(200, 16, 46, 0.3);
+            border-radius: var(--border-radius);
+            position: relative;
+            z-index: 5;
+        }
+        .result-title {
+            font-size: var(--font-size-subtitle);
+            color: var(--color-gold);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .save-result-btn {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--color-gold);
+            border: 1px solid var(--color-gold);
+            border-radius: 50px;
+            padding: 5px 15px;
+            font-size: calc(var(--font-size-base) - 2px);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .save-result-btn:hover {
+            background: var(--color-gold);
+            color: var(--color-black);
+        }
+        #fengshui-result {
+            font-size: var(--font-size-base);
+            line-height: 1.8;
+        }
+
+        /* 操作按钮组（重置/分享/解读） */
+        .action-buttons {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto 50px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            position: relative;
+            z-index: 5;
+        }
+        .action-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, rgba(200, 16, 46, 0.8), rgba(180, 10, 25, 0.6));
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: var(--font-size-base);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .action-btn:hover {
+            background: linear-gradient(135deg, var(--color-gold), rgba(255, 215, 0, 0.8));
+            color: var(--color-black);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        /* 罗盘使用指南（新增模块） */
+        .guide-section {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--card-padding);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(200, 16, 46, 0.1));
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: var(--border-radius);
+            position: relative;
+            z-index: 5;
+        }
+        .guide-title {
+            font-size: var(--font-size-subtitle);
+            color: var(--color-gold);
+            margin-bottom: 20px;
+        }
+        .guide-list {
+            list-style: none;
+            font-size: var(--font-size-base);
+            line-height: 2;
+            color: var(--color-gray-light);
+        }
+        .guide-list li {
+            margin-bottom: 15px;
+            padding-left: 25px;
+            position: relative;
+        }
+        .guide-list li::before {
+            content: '✦';
+            color: var(--color-red);
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .compass-container {
+                width: 95%;
+                height: 450px;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 国风线条背景 -->
+    <canvas class="bg-lines"></canvas>
+
+    <!-- 头部导航 -->
+    <header>
+        <button class="back-btn" onclick="window.location.href='../index.html'">
+            ← 返回首页
+        </button>
+        <div class="header-actions">
+            <button class="theme-switch" id="themeSwitch">长辈</button>
+            <button class="voice-switch" id="voiceSwitch" onclick="toggleVoice()">播报</button>
+        </div>
+    </header>
+
+    <!-- 页面标题 -->
+    <h1 class="page-title">赛博罗盘 · 精准风水测算</h1>
+    <p class="page-subtitle">拖动罗盘调整方位，实时解读五行八卦吉凶<br>结合传统风水理论，给出专属调整建议</p>
+
+    <!-- 核心罗盘容器 -->
+    <div class="compass-container">
+        <canvas id="compass-detail-canvas"></canvas>
+        <p class="compass-tip">🎯 拖动罗盘精准定位 | 实时显示方位、五行、吉凶属性</p>
+    </div>
+
+    <!-- 风水结果卡片 -->
+    <div class="fengshui-result">
+        <div class="result-title">
+            风水解读结果
+            <button class="save-result-btn" onclick="saveCurrentResult()">保存结果</button>
+        </div>
+        <div id="fengshui-result">
+            <p style="text-align: center; color: var(--color-gray-light);">请拖动罗盘开始测算...</p>
+        </div>
+    </div>
+
+    <!-- 操作按钮组 -->
+    <div class="action-buttons">
+        <button class="action-btn" onclick="resetCompass()">
+            🔄 重置罗盘
+        </button>
+        <button class="action-btn" onclick="shareResult()">
+            📤 分享结果
+        </button>
+        <button class="action-btn" onclick="showFullInterpretation()">
+            📖 详细解读
+        </button>
+    </div>
+
+    <!-- 罗盘使用指南 -->
+    <div class="guide-section">
+        <h3 class="guide-title">罗盘使用指南</h3>
+        <ul class="guide-list">
+            <li>1. 保持设备水平，拖动罗盘旋转至目标方位（如大门、卧室床头、办公桌朝向）</li>
+            <li>2. 罗盘刻度对应方位：0°=正北（坎位）、90°=正东（震位）、180°=正南（离位）、270°=正西（兑位）</li>
+            <li>3. 五行属性解读：金（白色/金色）主财、木（绿色/青色）主运、水（黑色/蓝色）主智、火（红色/紫色）主名、土（黄色/棕色）主稳</li>
+            <li>4. 吉凶判断依据：结合八卦方位、五行生克、当日时辰综合分析，结果仅供参考</li>
+            <li>5. 调整建议为传统风水经验总结，可根据自身情况选择性采纳，理性看待</li>
+        </ul>
+    </div>
+
+    <!-- 引入脚本 -->
+    <script src="../js/theme-utils.js"></script>
+    <script src="../js/compass-utils.js"></script>
+    <script>
+        // 页面加载完成后初始化
+        window.addEventListener('load', function() {
+            // 初始化模式切换
+            initThemeSwitch();
+            // 初始化详情页罗盘（可交互）
+            initCompass('compass-detail-canvas', true);
+            // 绘制背景线条
+            drawBackgroundLines();
+        });
+
+        // 重置罗盘
+        function resetCompass() {
+            window.location.reload();
+        }
+
+        // 保存当前风水结果
+        function saveCurrentResult() {
+            const rotation = window.getCompassRotation();
+            const resultEl = document.getElementById('fengshui-result');
+            const resultHtml = resultEl.innerHTML;
+            
+            if (resultHtml.includes('请拖动罗盘开始测算')) {
+                alert('请先拖动罗盘获取测算结果后再保存！');
+                return;
+            }
+
+            // 构造保存数据
+            const resultData = {
+                rotation: rotation,
+                content: resultHtml,
+                time: new Date().toLocaleString()
+            };
+
+            // 保存到本地存储
+            const savedResults = JSON.parse(localStorage.getItem('fengshuiResults') || '[]');
+            savedResults.push(resultData);
+            // 只保留最近5条结果
+            const latestResults = savedResults.slice(-5);
+            localStorage.setItem('fengshuiResults', JSON.stringify(latestResults));
+
+            alert('✅ 风水测算结果已保存！可在"我的"页面查看历史记录');
+        }
+
+        // 分享结果（模拟功能）
+        function shareResult() {
+            const rotation = window.getCompassRotation();
+            const resultEl = document.getElementById('fengshui-result');
+            
+            if (resultEl.innerHTML.includes('请拖动罗盘开始测算')) {
+                alert('请先拖动罗盘获取测算结果后再分享！');
+                return;
+            }
+
+            // 模拟分享文本
+            const shareText = `我用赛博罗盘测算的风水结果：
+方位角度：${rotation}°
+${resultEl.innerText.replace(/<[^>]*>/g, '').substring(0, 100)}...
+更多详情请查看赛博罗盘小程序`;
+
+            // 模拟复制到剪贴板
+            navigator.clipboard.writeText(shareText).then(() => {
+                alert('📋 分享文本已复制到剪贴板，可粘贴到微信/朋友圈等平台');
+            }).catch(() => {
+                alert('复制失败，请手动复制以下内容：\n' + shareText);
+            });
+        }
+
+        // 显示详细解读（模拟弹窗）
+        function showFullInterpretation() {
+            const rotation = window.getCompassRotation();
+            const resultEl = document.getElementById('fengshui-result');
+            
+            if (resultEl.innerHTML.includes('请拖动罗盘开始测算')) {
+                alert('请先拖动罗盘获取测算结果后再查看详细解读！');
+                return;
+            }
+
+            // 模拟详细解读内容
+            let fullText = '';
+            const direction = resultEl.innerText.match(/当前方位：(.*?)（/)[1];
+            
+            switch(direction) {
+                case '正北':
+                    fullText = `【正北（坎位）详细解读】
+坎为水，主智、主财，代表智慧与机遇。
+传统风水认为，正北方位为玄武位，宜静不宜动，是住宅的靠山位。
+✅ 吉位特征：
+1. 正北方位整洁、明亮、无遮挡，主家人智慧提升，财运顺遂
+2. 摆放水生植物（如富贵竹、绿萝）可增强水气，提升财运
+3. 保持通风干燥，忌潮湿阴暗
+
+❌ 忌犯特征：
+1. 正北方位堆放杂物、有尖角冲射，主家人思维混乱，财运受阻
+2. 摆放过多红色/紫色物品（火克水），主口舌是非，财运下降
+3. 方位潮湿漏水，主健康受损，易患泌尿系统疾病
+
+🔧 调整方案：
+1. 清理正北方位杂物，保持整洁
+2. 摆放黑色/蓝色饰品增强水气
+3. 忌摆放大型电器（火属性）
+4. 可悬挂五帝钱化解煞气`;
+                    break;
+                case '正东':
+                    fullText = `【正东（震位）详细解读】
+震为木，主运、主事业，代表发展与突破。
+传统风水认为，正东方位为青龙位，宜动不宜静，是住宅的青龙方。
+✅ 吉位特征：
+1. 正东方位开阔、有窗户，主家人事业顺利，发展迅速
+2. 摆放绿植（如发财树、君子兰）可增强木气，提升事业运
+3. 保持光线充足，忌阴暗
+
+❌ 忌犯特征：
+1. 正东方位有重物压制、无窗户，主家人事业受阻，发展缓慢
+2. 摆放过多金属物品（金克木），主事业压力大，易遇小人
+3. 方位杂乱无章，主家人情绪不稳，易发脾气
+
+🔧 调整方案：
+1. 打开正东方位窗户，增加阳气
+2. 摆放绿色/青色饰品增强木气
+3. 忌摆放刀具、剪刀等金属利器
+4. 可摆放文昌塔提升事业运`;
+                    break;
+                default:
+                    fullText = `【${direction}详细解读】
+该方位五行属${resultEl.innerText.match(/五行：(.*?) ·/)[1]}，主${resultEl.innerText.match(/吉凶：(.*?)\n/)[1]}。
+传统风水认为，此方位为${resultEl.innerText.match(/（(.*?)）/)[1]}，是住宅的重要方位之一。
+✅ 吉位特征：保持整洁、通风、光线充足，摆放对应五行属性的饰品
+❌ 忌犯特征：堆放杂物、有尖角冲射、摆放相克五行属性的物品
+🔧 调整方案：根据五行生克原理，摆放相生属性的饰品，化解相克因素`;
+            }
+
+            // 模拟弹窗显示
+            alert(`📖 ${direction}详细风水解读：\n\n${fullText}`);
+        }
+
+        // 绘制背景动态线条（增强视觉效果）
+        function drawBackgroundLines() {
+            const canvas = document.querySelector('.bg-lines');
+            const ctx = canvas.getContext('2d');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            canvas.width = width;
+            canvas.height = height;
+
+            // 生成随机线条
+            const lines = [];
+            const lineCount = 20;
+
+            for (let i = 0; i < lineCount; i++) {
+                lines.push({
+                    x1: Math.random() * width,
+                    y1: Math.random() * height,
+                    x2: Math.random() * width,
+                    y2: Math.random() * height,
+                    speed: Math.random() * 0.5 + 0.1,
+                    angle: Math.random() * Math.PI * 2
+                });
+            }
+
+            // 动画函数
+            function animateLines() {
+                ctx.clearRect(0, 0, width, height);
+                
+                lines.forEach(line => {
+                    // 更新线条位置
+                    line.x1 += Math.cos(line.angle) * line.speed;
+                    line.y1 += Math.sin(line.angle) * line.speed;
+                    line.x2 += Math.cos(line.angle + Math.PI/4) * line.speed;
+                    line.y2 += Math.sin(line.angle + Math.PI/4) * line.speed;
+
+                    // 边界检测
+                    if (line.x1 < 0 || line.x1 > width) line.angle = Math.PI - line.angle;
+                    if (line.y1 < 0 || line.y1 > height) line.angle = -line.angle;
+                    if (line.x2 < 0 || line.x2 > width) line.angle = Math.PI - line.angle;
+                    if (line.y2 < 0 || line.y2 > height) line.angle = -line.angle;
+
+                    // 绘制线条
+                    ctx.beginPath();
+                    ctx.moveTo(line.x1, line.y1);
+                    ctx.lineTo(line.x2, line.y2);
+                    ctx.strokeStyle = 'rgba(255, 215, 0, 0.5)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                });
+
+                requestAnimationFrame(animateLines);
+            }
+
+            animateLines();
+
+            // 窗口大小变化时重新绘制
+            window.addEventListener('resize', function() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+    </script>
+</body>
+</html>
