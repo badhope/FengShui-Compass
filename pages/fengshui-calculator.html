@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>家居风水测算 · 全屋分区解读 - 国风玄易</title>
+    <style>
+        /* 全局变量与基础样式（保持风格统一） */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "SimHei", "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+        :root {
+            /* 国风主色调 */
+            --color-black: #0a0a0a; /* 玄黑 */
+            --color-red: #c8102e; /* 朱砂红 */
+            --color-gold: #ffd700; /* 鎏金 */
+            --color-green: #228b22; /* 青黛绿 */
+            --color-blue: #1e90ff; /* 水蓝 */
+            --color-gray-light: #e0e0e0; /* 浅灰 */
+            --color-gray-dark: #333; /* 深灰 */
+            
+            /* 年轻模式变量 */
+            --font-size-base: 16px;
+            --font-size-title: 20px;
+            --font-size-subtitle: 18px;
+            --button-size: 44px;
+            --card-padding: 20px;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* 长辈模式变量 */
+            --elder-font-base: 32px;
+            --elder-font-title: 36px;
+            --elder-font-subtitle: 34px;
+            --elder-button-size: 80px;
+            --elder-card-padding: 35px;
+            --elder-border-radius: 20px;
+        }
+        .elder-mode {
+            --font-size-base: var(--elder-font-base);
+            --font-size-title: var(--elder-font-title);
+            --font-size-subtitle: var(--elder-font-subtitle);
+            --button-size: var(--elder-button-size);
+            --card-padding: var(--elder-card-padding);
+            --border-radius: var(--elder-border-radius);
+            --shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+        }
+        body {
+            background-color: var(--color-black);
+            color: #fff;
+            background-image: radial-gradient(circle at 30% 70%, rgba(34, 139, 34, 0.08) 0%, rgba(200, 16, 46, 0.05) 90%);
+            min-height: 100vh;
+            padding-bottom: 60px;
+            transition: var(--transition);
+        }
+
+        /* 头部导航（返回+模式切换） */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 5%;
+            border-bottom: 2px solid rgba(200, 16, 46, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(200, 16, 46, 0.8);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: var(--font-size-base);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .back-btn:hover {
+            background: var(--color-gold);
+            color: var(--color-black);
+            transform: scale(1.05);
+        }
+        .theme-switch {
+            width: var(--button-size);
+            height: var(--button-size);
+            border: none;
+            border-radius: 50%;
+            background-color: rgba(200, 16, 46, 0.8);
+            color: #fff;
+            font-size: calc(var(--font-size-base) - 4px);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .theme-switch:hover {
+            background-color: var(--color-gold);
+            color: var(--color-black);
+            transform: scale(1.05);
+        }
+
+        /* 页面标题 */
+        .page-title {
+            text-align: center;
+            font-size: var(--font-size-title);
+            color: var(--color-gold);
+            margin: 30px 0;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 5;
+        }
+        .page-subtitle {
+            text-align: center;
+            font-size: var(--font-size-base);
+            color: var(--color-gray-light);
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 5;
+            line-height: 1.6;
+        }
+
+        /* 户型图容器（可视化核心） */
+        .house-layout {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto 50px;
+            padding: var(--card-padding);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(200, 16, 46, 0.1));
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: var(--border-radius);
+            position: relative;
+            z-index: 5;
+        }
+        .layout-title {
+            font-size: var(--font-size-subtitle);
+            color: var(--color-gold);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .layout-canvas-container {
+            width: 100%;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        #house-layout-canvas {
+            width: 100%;
+            height: 100%;
+        }
+        .layout-tip {
+            text-align: center;
+            font-size: var(--font-size-base);
+            color: var(--color-gray-light);
+            line-height: 1.6;
+        }
+
+        /* 区域选择器 */
+        .area-selector {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto 50px;
+            position: relative;
+            z-index: 5;
+        }
+        .selector-title {
+            font-size: var(--font-size-subtitle);
+            color: var(--color-gold);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .area-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        .area-btn {
+            padding: 15px 10px;
+            background: linear-gradient(135deg, rgba(200, 16, 46, 0.6), rgba(180, 10, 25, 0.4));
+            color: #fff;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-base);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+        .area-btn.active {
+            background: linear-gradient(135deg, var(--color-gold), rgba(255, 215, 0, 0.8));
+            color: var(--color-black);
+            font-weight: bold;
+        }
+        .area-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        /* 测算结果卡片（大幅丰富内容） */
+        .calculator-result {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto 50px;
+            padding: var(--card-padding);
+            background: linear-gradient(135deg, rgba(200, 16, 46, 0.15), rgba(255, 215, 0, 0.08));
+            border: 1px solid rgba(200, 16, 46, 0.3);
+            border-radius: var(--border-radius);
+            position: relative;
+            z-index: 5;
+            display: none; /* 默认隐藏，选择区域后显示 */
+        }
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        .result-title {
+            font-size: var(--font-size-subtitle);
+            color: var(--color-gold);
+        }
+        .save-result-btn {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--color-gold);
+            border: 1px solid var(--color-gold);
+            border-radius: 50px;
+            padding: 5px 15px;
+            font-size: calc(var(--font-size-base) - 2px);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .save-result-btn:hover {
+            background: var(--color-gold);
+            color: var(--color-black);
+        }
+        .result-content {
+            font-size: var(--font-size-base);
+            line-height: 2;
+            color: var(--color-gray-light);
+        }
+        .result-score {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .score-label {
+            font-size: var(--font-size-base);
+            color: var(--color-gold);
+        }
+        .score-bar {
+            flex: 1;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-red), var(--color-gold), var(--color-green));
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+        }
+        .score-value {
+            font-size: var(--font-size-base);
+            color: var(--color-gold);
+            font-weight: bold;
+        }
+        .result-section {
+            margin-bottom: 25px;
+        }
+        .result-section-title {
+            color: var(--color-red);
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .adjust-tips {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .adjust-tips-title {
+            color: var(--color-gold);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .adjust-tips-list {
+            list-style: none;
+            padding-left: 15px;
+        }
+        .adjust-tips-list li {
+            margin-bottom: 8px;
+            position: relative;
+        }
+        .adjust-tips-list li::before {
+            content: '✓';
+            color: var(--color-green);
+            position: absolute;
+            left: -15px;
+        }
+
+        /* 生成报告按钮 */
+        .generate-report {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            position: relative;
+            z-index: 5;
+        }
+        .report-btn {
+            padding: 18px 40px;
+            background: linear-gradient(135deg, var(--color-red), var(--color-gold));
+            color: var(--color-black);
+            border: none;
+            border-radius: 50px;
+            font-size: var(--font-size-base);
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .report-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .layout-canvas-container {
+                height: 300px;
+            }
+            .area-buttons {
+                grid-template-columns: 1fr 1fr;
+            }
+            .result-score {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .score-bar {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header>
+        <button class="back-btn" onclick="window.location.href='../index.html'">
+            ← 返回首页
+        </button>
+        <button class="theme-switch" id="themeSwitch">长辈</button>
+    </header>
+
+    <!-- 页面标题 -->
+    <h1 class="page-title">家居风水测算 · 全屋分区解读</h1>
+    <p class="page-subtitle">选择家居不同区域，精准测算风水吉凶<br>结合户型方位，给出可视化改造建议</p>
+
+    <!-- 户型图容器 -->
+    <div class="house-layout">
+        <h3 class="layout-title">家居户型示意图（点击区域可选中）</h3>
+        <div class="layout-canvas-container">
+            <canvas id="house-layout-canvas"></canvas>
+        </div>
+        <p class="layout-tip">🖱️ 点击户型图中的区域或下方按钮，查看对应风水解读</p>
+    </div>
+
+    <!-- 区域选择器 -->
+    <div class="area-selector">
+        <h3 class="selector-title">选择测算区域</h3>
+        <div class="area-buttons">
+            <button class="area-btn" onclick="selectArea('living')">客厅</button>
+            <button class="area-btn" onclick="selectArea('bedroom')">卧室</button>
+            <button class="area-btn" onclick="selectArea('kitchen')">厨房</button>
+            <button class="area-btn" onclick="selectArea('toilet')">卫生间</button>
+            <button class="area-btn" onclick="selectArea('entrance')">入户门</button>
+            <button class="area-btn" onclick="selectArea('study')">书房</button>
+            <button class="area-btn" onclick="selectArea('balcony')">阳台</button>
+            <button class="area-btn" onclick="selectArea('dining')">餐厅</button>
+        </div>
+    </div>
+
+    <!-- 测算结果卡片 -->
+    <div class="calculator-result" id="calculatorResult">
+        <div class="result-header">
+            <div class="result-title" id="resultAreaTitle">客厅风水测算结果</div>
+            <button class="save-result-btn" onclick="saveHouseResult()">保存结果</button>
+        </div>
+        <div class="result-score">
+            <div class="score-label">风水评分：</div>
+            <div class="score-bar">
+                <div class="score-fill" id="scoreFill" style="width: 0%"></div>
+            </div>
+            <div class="score-value" id="scoreValue">0分</div>
+        </div>
+        <div class="result-content" id="resultContent">
+            <!-- 动态填充内容 -->
+        </div>
+    </div>
+
+    <!-- 生成报告按钮 -->
+    <div class="generate-report">
+        <button class="report-btn" onclick="generateFullReport()">📄 生成全屋风水报告</button>
+    </div>
+
+    <!-- 引入脚本 -->
+    <script src="../js/theme-utils.js"></script>
+    <script>
+        // 页面加载完成后初始化
+        window.addEventListener('load', function() {
+            // 初始化模式切换
+            initThemeSwitch();
+            // 绘制户型图
+            drawHouseLayout();
+        });
+
+        // 户型图绘制函数（可视化核心）
+        function drawHouseLayout() {
+            const canvas = document.getElementById('house-layout-canvas');
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            
+            // 适配高清屏
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            // 户型图参数
+            const width = rect.width;
+            const height = rect.height;
+            const padding = 20;
+            const isElderMode = getCurrentTheme() === 'elder';
+            const fontSize = isElderMode ? 18 : 14;
+
+            // 区域定义（坐标+名称+颜色）
+            const areas = [
+                { name: 'entrance', text: '入户门', x: padding, y: height/2 - 40, w: 80, h: 80, color: '#c8102e' },
+                { name: 'living', text: '客厅', x: padding + 90, y: padding, w: width/2 - 110, h: height - 2*padding, color: '#ffd700' },
+                { name: 'dining', text: '餐厅', x: width/2 + 10, y: padding, w: width/2 - 110, h: height/3, color: '#228b22' },
+                { name: 'kitchen', text: '厨房', x: width/2 + 10, y: height/3 + 10, w: width/2 - 110, h: height/3 - 20, color: '#ff4500' },
+                { name: 'toilet', text: '卫生间', x: width/2 + 10, y: 2*height/3, w: width/4 - 60, h: height/3 - padding, color: '#1e90ff' },
+                { name: 'bedroom', text: '卧室', x: width/2 + width/4 + 50, y: height/2, w: width/4 - 70, h: height/2 - padding, color: '#9370db' },
+                { name: 'study', text: '书房', x: width/2 + width/4 + 50, y: padding, w: width/4 - 70, h: height/2 - padding - 10, color: '#8b4513' },
+                { name: 'balcony', text: '阳台', x: padding + 90, y: height - padding - 40, w: width/2 - 110, h: 40, color: '#00fa9a' }
+            ];
+
+            // 绘制背景
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.fillRect(0, 0, width, height);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(padding, padding, width - 2*padding, height - 2*padding);
+
+            // 绘制各个区域
+            areas.forEach(area => {
+                // 绘制区域矩形
+                ctx.fillStyle = area.color + '80'; // 半透明
+                ctx.fillRect(area.x, area.y, area.w, area.h);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(area.x, area.y, area.w, area.h);
+
+                // 绘制区域名称
+                ctx.fillStyle = '#fff';
+                ctx.font = `bold ${fontSize}px SimHei`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(area.text, area.x + area.w/2, area.y + area.h/2);
+            });
+
+            // 绑定点击事件
+            canvas.addEventListener('click', function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (canvas.width / rect.width) / dpr;
+                const y = (e.clientY - rect.top) * (canvas.height / rect.height) / dpr;
+
+                // 判断点击的区域
+                for (let area of areas) {
+                    if (x >= area.x && x <= area.x + area.w && y >= area.y && y <= area.y + area.h) {
+                        selectArea(area.name);
+                        break;
+                    }
+                }
+            });
+
+            // 保存区域数据供外部使用
+            window.houseAreas = areas;
+        }
+
+        // 选择区域并显示测算结果
+        function selectArea(areaName) {
+            // 重置所有按钮状态
+            const areaButtons = document.querySelectorAll('.area-btn');
+            areaButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // 激活当前按钮
+            const activeBtn = Array.from(areaButtons).find(btn => {
+                return btn.getAttribute('onclick').includes(areaName);
+            });
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // 家居风水测算数据（大幅丰富）
+            const areaData = {
+                living: {
+                    name: '客厅',
+                    score: 85,
+                    desc: '客厅是住宅的核心区域，代表家庭的整体运势和社交运，也是气场汇聚的中心。',
+                    analysis: '您家客厅位于住宅中心位置，坐北朝南，采光充足，气场流通顺畅，整体风水格局良好。客厅无横梁压顶，沙发未背靠窗户，符合"有靠山"的风水原则；电视背景墙无镜面反光，避免了气场混乱。',
+                    strengths: '1. 采光充足，阳气旺盛；2. 格局方正，气场稳定；3. 无尖角冲射，煞气较少；4. 动线合理，流通顺畅。',
+                    weaknesses: '1. 客厅财位（东南角）有杂物堆放，影响财运汇聚；2. 绿植摆放过多，木气过旺，易导致家人情绪波动；3. 颜色搭配偏冷，缺少暖色调调和。',
+                    adjustTips: [
+                        '清理客厅东南角杂物，摆放招财猫或貔貅摆件，增强财运',
+                        '减少大型绿植数量，保留1-2盆小型观叶植物即可',
+                        '增加暖色调软装（如红色抱枕、黄色地毯），调和气场',
+                        '客厅中央可摆放圆形吊灯，增强气场汇聚',
+                        '避免在客厅摆放尖锐物品（如金属摆件、棱角家具）'
+                    ]
+                },
+                bedroom: {
+                    name: '卧室',
+                    score: 78,
+                    desc: '卧室是休息养身的区域，代表健康运和感情运，风水好坏直接影响睡眠质量和身心健康。',
+                    analysis: '您家卧室位于住宅西南角，坤位属土，主稳定和谐，适合作为卧室使用。床头朝向正北（坎位），水主智，有助于提升睡眠质量；卧室面积适中，无过大或过小的问题。',
+                    strengths: '1. 床头有实墙靠山，安全感强；2. 卧室无卫生间门直冲，避免煞气入侵；3. 采光适中，避免阳光直射床位；4. 家具摆放对称，气场平衡。',
+                    weaknesses: '1. 床头上方有吊灯，易导致头痛失眠；2. 卧室镜子正对床位，易引发噩梦和情绪不稳；3. 电器过多，辐射影响健康；4. 窗帘颜色过深，阴气偏重。',
+                    adjustTips: [
+                        '移除床头上方吊灯，更换为壁灯或落地灯',
+                        '用布帘遮挡镜子，避免镜面正对床位',
+                        '减少卧室内电器数量，尤其避免在床头摆放手机、充电器',
+                        '更换浅色系窗帘，增加自然光进入',
+                        '床头可摆放天然水晶摆件，净化气场'
+                    ]
+                },
+                kitchen: {
+                    name: '厨房',
+                    score: 70,
+                    desc: '厨房是饮食之源，代表健康运和财运，五行属火，风水好坏影响家人健康和财富积累。',
+                    analysis: '您家厨房位于住宅东南方，巽位属木，木生火，符合风水相生原则。厨房灶台与水槽分开摆放，避免了"水火相冲"的问题；通风良好，油烟能及时排出。',
+                    strengths: '1. 灶台朝向吉位，火旺生财；2. 通风顺畅，气场清新；3. 收纳整齐，无杂物堆积；4. 颜色以暖色调为主，火气充足。',
+                    weaknesses: '1. 厨房门正对餐厅，易导致家人食欲过盛；2. 刀具外露摆放，煞气较重；3. 灶台靠近窗户，火力易散；4. 缺少绿植调和火气。',
+                    adjustTips: [
+                        '安装门帘遮挡厨房门，避免气场直冲餐厅',
+                        '将刀具收纳到抽屉或刀架中，避免外露',
+                        '灶台处安装防油挡板，减少火力散失',
+                        '摆放1-2盆小型多肉植物，调和火气',
+                        '定期清洁厨房，保持炉灶干净'
+                    ]
+                },
+                toilet: {
+                    name: '卫生间',
+                    score: 65,
+                    desc: '卫生间是排污之所，五行属水，风水不当易导致煞气扩散，影响家人健康和运势。',
+                    analysis: '您家卫生间位于住宅西北方，乾位属金，金生水，虽不相克但水气过重，易导致贵人运下降。卫生间有窗户通风，可及时排出浊气；马桶未正对门口，避免了煞气直冲。',
+                    strengths: '1. 有窗户通风，浊气易散；2. 马桶位置合理，无直冲门；3. 地面无积水，保持干燥；4. 定期清洁，无异味。',
+                    weaknesses: '1. 卫生间门正对卧室，易导致健康问题；2. 缺少绿植净化空气；3. 镜面过大，易反射煞气；4. 收纳不足，杂物较多。',
+                    adjustTips: [
+                        '安装磨砂玻璃门或门帘，遮挡卫生间门',
+                        '摆放虎尾兰等耐阴植物，净化空气',
+                        '减少镜面面积，或用布帘遮挡部分镜面',
+                        '增加收纳柜，保持卫生间整洁',
+                        '摆放天然竹炭包，吸附湿气和异味'
+                    ]
+                },
+                entrance: {
+                    name: '入户门',
+                    score: 90,
+                    desc: '入户门是住宅的气口，代表财运和贵人运，是气场进出的关键通道。',
+                    analysis: '您家入户门朝向正东（震位），木主旺，代表事业发展顺利，贵人运佳。门的大小适中，无过高或过低的问题；门前无杂物堆积，气场通畅。',
+                    strengths: '1. 朝向吉位，贵人运旺；2. 门前整洁，气场通畅；3. 门的颜色为红色，火气旺盛；4. 无尖角冲射，煞气较少。',
+                    weaknesses: '1. 鞋柜外露，易导致气场混乱；2. 缺少玄关遮挡，气场直冲客厅；3. 门垫颜色偏暗，缺少生气；4. 门把手松动，影响使用。',
+                    adjustTips: [
+                        '安装玄关柜或屏风，遮挡入户门直冲客厅',
+                        '将鞋柜收纳到玄关柜中，避免外露',
+                        '更换红色或黄色门垫，增加生气',
+                        '及时维修门把手，保证开关顺畅',
+                        '门口可摆放小型绿植，增强生气'
+                    ]
+                },
+                study: {
+                    name: '书房',
+                    score: 82,
+                    desc: '书房是学习工作的区域，代表文昌运和事业运，风水好坏影响学习效率和工作发展。',
+                    analysis: '您家书房位于住宅东北方，艮位属土，土主稳，适合静心学习和工作。书桌朝向窗户，采光充足；座椅有靠山，符合风水原则。',
+                    strengths: '1. 采光充足，思维清晰；2. 座椅有靠山，事业稳定；3. 收纳整齐，无杂物干扰；4. 颜色以浅色调为主，心情舒畅。',
+                    weaknesses: '1. 书桌正对窗户，易分心；2. 电子产品过多，辐射影响健康；3. 缺少文昌塔等助运摆件；4. 灯光过亮，易疲劳。',
+                    adjustTips: [
+                        '调整书桌位置，避免正对窗户',
+                        '减少电子产品数量，摆放防辐射植物',
+                        '在书桌左侧摆放文昌塔，提升文昌运',
+                        '更换柔和灯光，避免强光直射',
+                        '定期整理书桌，保持整洁有序'
+                    ]
+                },
+                balcony: {
+                    name: '阳台',
+                    score: 75,
+                    desc: '阳台是住宅的纳气口，代表外部运势和贵人运，也是气场与外界交流的通道。',
+                    analysis: '您家阳台朝向正南（离位），火主名，代表名声和社交运。阳台宽敞，采光充足；无杂物堆积，气场通畅。',
+                    strengths: '1. 朝向吉位，社交运旺；2. 宽敞明亮，气场通畅；3. 无杂物堆积，整洁有序；4. 绿植适量，生气勃勃。',
+                    weaknesses: '1. 阳台晾晒衣物过多，易导致气场混乱；2. 缺少休闲区域，利用率低；3. 护栏过低，安全感不足；4. 无遮阳设施，夏季过晒。',
+                    adjustTips: [
+                        '安装隐形晾衣架，减少衣物外露',
+                        '设置小型休闲区，增加阳台利用率',
+                        '加高护栏或安装防护网，增强安全感',
+                        '安装遮阳帘，调节阳光强度',
+                        '摆放风水轮等摆件，增强气场流通'
+                    ]
+                },
+                dining: {
+                    name: '餐厅',
+                    score: 80,
+                    desc: '餐厅是饮食区域，代表健康运和家庭和谐，风水好坏影响家人食欲和感情。',
+                    analysis: '您家餐厅位于住宅东南方，巽位属木，木主运，代表家人健康和财运。餐桌大小适中，适合家庭使用；位置靠近厨房，用餐方便。',
+                    strengths: '1. 位置合理，用餐方便；2. 餐桌方正，气场稳定；3. 采光充足，食欲旺盛；4. 装饰温馨，家庭和谐。',
+                    weaknesses: '1. 餐桌正对厨房门，易导致暴饮暴食；2. 座椅数量不均，气场失衡；3. 缺少绿植调和；4. 灯光过亮，易疲劳。',
+                    adjustTips: [
+                        '调整餐桌位置，避免正对厨房门',
+                        '保证座椅数量对称，气场平衡',
+                        '摆放小型鲜花或绿植，调和气场',
+                        '更换柔和灯光，营造温馨氛围',
+                        '餐桌上可摆放圆形摆件，增强家庭和谐'
+                    ]
+                }
+            };
+
+            // 获取当前区域数据
+            const data = areaData[areaName] || areaData.living;
+            
+            // 显示结果卡片
+            const resultCard = document.getElementById('calculatorResult');
+            resultCard.style.display = 'block';
+            
+            // 更新标题
+            document.getElementById('resultAreaTitle').textContent = `${data.name}风水测算结果`;
+            
+            // 动画显示评分
+            const scoreFill = document.getElementById('scoreFill');
+            const scoreValue = document.getElementById('scoreValue');
+            
+            let currentScore = 0;
+            const scoreInterval = setInterval(() => {
+                currentScore += 1;
+                if (currentScore >= data.score) {
+                    currentScore = data.score;
+                    clearInterval(scoreInterval);
+                }
+                scoreFill.style.width = `${currentScore}%`;
+                scoreValue.textContent = `${currentScore}分`;
+            }, 20);
+            
+            // 更新结果内容
+            document.getElementById('resultContent').innerHTML = `
+                <div class="result-section">
+                    <div class="result-section-title">区域解读：</div>
+                    ${data.desc}
+                </div>
+                <div class="result-section">
+                    <div class="result-section-title">风水分析：</div>
+                    ${data.analysis}
+                </div>
+                <div class="result-section">
+                    <div class="result-section-title">优势：</div>
+                    ${data.strengths}
+                </div>
+                <div class="result-section">
+                    <div class="result-section-title">不足：</div>
+                    ${data.weaknesses}
+                </div>
+                <div class="result-section">
+                    <div class="adjust-tips">
+                        <div class="adjust-tips-title">调整建议：</div>
+                        <ul class="adjust-tips-list">
+                            ${data.adjustTips.map(tip => `<li>${tip}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            // 保存当前选中区域
+            window.currentArea = data;
+        }
+
+        // 保存家居风水结果
+        function saveHouseResult() {
+            if (!window.currentArea) {
+                alert('请先选择测算区域并查看结果后再保存！');
+                return;
+            }
+
+            // 构造保存数据
+            const resultData = {
+                area: window.currentArea.name,
+                score: window.currentArea.score,
+                content: document.getElementById('resultContent').innerHTML,
+                time: new Date().toLocaleString()
+            };
+
+            // 保存到本地存储
+            const houseResults = JSON.parse(localStorage.getItem('houseFengshuiResults') || '[]');
+            houseResults.push(resultData);
+            // 只保留最近8条结果
+            const latestResults = houseResults.slice(-8);
+            localStorage.setItem('houseFengshuiResults', JSON.stringify(latestResults));
+
+            alert(`✅ ${window.currentArea.name}风水测算结果已保存！可在"我的"页面查看`);
+        }
+
+        // 生成全屋风水报告（模拟功能）
+        function generateFullReport() {
+            // 模拟报告内容
+            const reportContent = `
+【全屋风水综合报告】
+生成时间：${new Date().toLocaleString()}
+整体评分：78分（良好）
+
+一、核心结论：
+1. 您家住宅整体坐北朝南，属于吉位朝向，整体风水格局良好
+2. 入户门、客厅、书房风水评分较高，是住宅的优势区域
+3. 卫生间、厨房风水存在一定不足，需要重点调整
+4. 整体气场流通顺畅，阳气充足，家人健康和事业运较好
+
+二、区域建议：
+1. 入户门：保持整洁，安装玄关柜增强气场汇聚
+2. 客厅：清理财位杂物，增加暖色调软装
+3. 卧室：移除床头吊灯，遮挡镜面反光
+4. 厨房：收纳刀具，增加绿植调和火气
+5. 卫生间：安装门帘遮挡，摆放净化植物
+6. 书房：调整书桌位置，摆放文昌塔助运
+7. 阳台：减少衣物外露，增加休闲区域
+8. 餐厅：调整餐桌位置，营造温馨氛围
+
+三、整体调整方案：
+1. 定期清洁各区域，保持气场通畅
+2. 根据五行生克原理，在相应区域摆放调和摆件
+3. 控制绿植数量，避免木气过旺
+4. 减少镜面和尖锐物品摆放，降低煞气
+5. 增加暖色调装饰，提升整体运势
+
+四、温馨提示：
+本报告基于传统风水理论生成，仅供参考。家居风水的核心是整洁、舒适、和谐，建议结合自身生活习惯进行调整，理性看待风水文化。
+            `;
+
+            // 模拟生成报告（复制到剪贴板）
+            navigator.clipboard.writeText(reportContent).then(() => {
+                alert('📄 全屋风水报告已生成并复制到剪贴板！\n\n您可以粘贴到文档中查看完整内容');
+            }).catch(() => {
+                alert(`📄 全屋风水报告已生成：\n\n${reportContent}`);
+            });
+
+            // 保存报告到本地存储
+            const fullReports = JSON.parse(localStorage.getItem('fullHouseReports') || '[]');
+            fullReports.push({
+                id: Date.now(),
+                content: reportContent,
+                time: new Date().toLocaleString()
+            });
+            localStorage.setItem('fullHouseReports', JSON.stringify(fullReports.slice(-3))); // 保留最近3份报告
+        }
+
+        // 复用主题判断函数
+        function getCurrentTheme() {
+            return localStorage.getItem('compassTheme') || 'youth';
+        }
+    </script>
+</body>
+</html>
