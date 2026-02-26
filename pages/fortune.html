@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>今日运势 · 生辰八字测算 - 国风玄易</title>
+    <style>
+        /* 全局变量与基础样式（保持风格统一） */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "SimHei", "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+        :root {
+            /* 国风主色调 */
+            --color-black: #0a0a0a; /* 玄黑 */
+            --color-red: #c8102e; /* 朱砂红 */
+            --color-gold: #ffd700; /* 鎏金 */
+            --color-green: #228b22; /* 青黛绿 */
+            --color-blue: #1e90ff; /* 水蓝 */
+            --color-gray-light: #e0e0e0; /* 浅灰 */
+            --color-gray-dark: #333; /* 深灰 */
+            
+            /* 年轻模式变量 */
+            --font-size-base: 16px;
+            --font-size-title: 20px;
+            --font-size-subtitle: 18px;
+            --button-size: 44px;
+            --card-padding: 20px;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* 长辈模式变量 */
+            --elder-font-base: 32px;
+            --elder-font-title: 36px;
+            --elder-font-subtitle: 34px;
+            --elder-button-size: 80px;
+            --elder-card-padding: 35px;
+            --elder-border-radius: 20px;
+        }
+        .elder-mode {
+            --font-size-base: var(--elder-font-base);
+            --font-size-title: var(--elder-font-title);
+            --font-size-subtitle: var(--elder-font-subtitle);
+            --button-size: var(--elder-button-size);
+            --card-padding: var(--elder-card-padding);
+            --border-radius: var(--elder-border-radius);
+            --shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+        }
+        body {
+            background-color: var(--color-black);
+            color: #fff;
+            background-image: radial-gradient(circle at 70% 30%, rgba(255, 215, 0, 0.08) 0%, rgba(34, 139, 34, 0.05) 90%);
+            min-height: 100vh;
+            padding-bottom: 60px;
+            transition: var(--transition);
+        }
+
+        /* 头部导航（返回+模式切换） */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 5%;
+            border-bottom: 2px solid rgba(200, 16, 46, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(200, 16, 46, 0.8);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: var(--font-size-base);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .back-btn:hover {
+            background: var(--color-gold);
+            color: var(--color-black);
+            transform: scale(1.05);
+        }
+        .theme-switch {
+            width: var(--button-size);
+            height: var(--button-size);
+            border: none;
+            border-radius: 50%;
+            background-color: rgba(200, 16, 46, 0.8);
+            color: #fff;
+            font-size: calc(var(--font-size-base) - 4px);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .theme-switch:hover {
+            background-color: var(--color-gold);
+            color: var(--color-black);
+            transform: scale(1.05);
+        }
+
+        /* 页面标题 */
+        .page-title {
+            text-align: center;
+            font-size: var(--font-size-title);
+            color: var(--color-gold);
+            margin: 30px 0;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 5;
+        }
+        .page-subtitle {
+            text-align: center;
+            font-size: var(--font-size-base);
+            color: var(--color-gray-light);
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 5;
+            line-height: 1.6;
+        }
+
+        /* 生辰信息录入表单 */
+        .fortune-form {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto 50px;
+            padding: var(--card-padding);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(200, 16, 46, 0.1));
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: var(--border-radius);
+            position: relative;
+            z-index: 5;
+        }
+        .form-title {
+            font-size: var(--font-size-subtitle);
+            color: var(--color-gold);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            font-size: var(--font-size-base);
+            color: var(--color-gray-light);
+            margin-bottom: 8px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            font-size: var(--font-size-base);
+            transition: var(--transition);
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--color-gold);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .form-col {
+            flex: 1;
+        }
+        .calculate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--color-red), var(--color-gold));
+            color: var(--color-black);
+            border: none;
+            border-radius: 8px;
+            font-size: var(--font-size-base);
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        /* 运势结果卡片（默认隐藏） */
+        .fortune-result {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto 50px;
+            padding: var(--card-padding);
+            background: linear-gradient(135deg, rgba(200, 16, 46, 0.15), rgba(255, 215, 0, 0.08));
+            border: 1px solid rgba(200, 16, 46, 0.3);
+            border-radius: var(--border-radius);
+            position: relative;
+            z-index: 5;
+            display: none;
+        }
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        .result-title {
+            font-size: var(--font-size-subtitle);
+            color: var(--color-gold);
+        }
+        .result-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .save-result-btn, .share-result-btn {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--color-gold);
+            border: 1px solid var(--color-gold);
+            border-radius: 50px;
+            padding: 5px 15px;
+            font-size: calc(var(--font-size-base) - 2px);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .save-result-btn:hover, .share-result-btn:hover {
+            background: var(--color-gold);
+            color: var(--color-black);
+        }
+
+        /* 运势趋势图 */
+        .fortune-chart {
+            width: 100%;
+            height: 250px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .chart-title {
+            text-align: center;
+            font-size: var(--font-size-base);
+            color: var(--color-gold);
+            padding: 10px 0;
+        }
+        #fortune-chart-canvas {
+            width: 100%;
+            height: calc(100% - 40px);
+        }
+
+        /* 运势维度卡片 */
+        .fortune-dimensions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .dimension-card {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        .dimension-title {
+            font-size: var(--font-size-base);
+            color: var(--color-gold);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dimension-score {
+            background: var(--color-red);
+            padding: 2px 8px;
+            border-radius: 50px;
+            font-size: calc(var(--font-size-base) - 4px);
+        }
+        .dimension-desc {
+            font-size: calc(var(--font-size-base) - 2px);
+            color: var(--color-gray-light);
+            line-height: 1.6;
+        }
+
+        /* 详细解读与开运建议 */
+        .fortune-details {
+            margin-bottom: 25px;
+        }
+        .detail-title {
+            font-size: var(--font-size-base);
+            color: var(--color-red);
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .detail-content {
+            font-size: var(--font-size-base);
+            color: var(--color-gray-light);
+            line-height: 1.8;
+        }
+        .luck-tips {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .luck-tips-title {
+            color: var(--color-gold);
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: var(--font-size-base);
+        }
+        .luck-tips-list {
+            list-style: none;
+            padding-left: 20px;
+        }
+        .luck-tips-list li {
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .luck-tips-list li::before {
+            content: '✨';
+            position: absolute;
+            left: -20px;
+            top: 0;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            .fortune-dimensions {
+                grid-template-columns: 1fr;
+            }
+            .fortune-chart {
+                height: 200px;
+            }
+            .result-actions {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .save-result-btn, .share-result-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header>
+        <button class="back-btn" onclick="window.location.href='../index.html'">
+            ← 返回首页
+        </button>
+        <button class="theme-switch" id="themeSwitch">长辈</button>
+    </header>
+
+    <!-- 页面标题 -->
+    <h1 class="page-title">今日运势 · 生辰八字测算</h1>
+    <p class="page-subtitle">输入您的生辰信息，精准测算今日运势<br>结合五行八卦，给出专属开运建议</p>
+
+    <!-- 生辰信息录入表单 -->
+    <div class="fortune-form">
+        <h3 class="form-title">请输入您的生辰信息</h3>
+        <div class="form-group">
+            <label class="form-label">姓名（选填）</label>
+            <input type="text" class="form-input" id="userName" placeholder="请输入您的姓名">
+        </div>
+        <div class="form-row">
+            <div class="form-col">
+                <label class="form-label">出生日期</label>
+                <input type="date" class="form-input" id="birthDate" required>
+            </div>
+            <div class="form-col">
+                <label class="form-label">出生时辰</label>
+                <select class="form-input" id="birthHour" required>
+                    <option value="">请选择时辰</option>
+                    <option value="23-01">子时 (23:00-01:00)</option>
+                    <option value="01-03">丑时 (01:00-03:00)</option>
+                    <option value="03-05">寅时 (03:00-05:00)</option>
+                    <option value="05-07">卯时 (05:00-07:00)</option>
+                    <option value="07-09">辰时 (07:00-09:00)</option>
+                    <option value="09-11">巳时 (09:00-11:00)</option>
+                    <option value="11-13">午时 (11:00-13:00)</option>
+                    <option value="13-15">未时 (13:00-15:00)</option>
+                    <option value="15-17">申时 (15:00-17:00)</option>
+                    <option value="17-19">酉时 (17:00-19:00)</option>
+                    <option value="19-21">戌时 (19:00-21:00)</option>
+                    <option value="21-23">亥时 (21:00-23:00)</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">性别</label>
+            <div style="display: flex; gap: 20px;">
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    <input type="radio" name="gender" value="male" checked style="width: 20px; height: 20px;"> 男
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    <input type="radio" name="gender" value="female" style="width: 20px; height: 20px;"> 女
+                </label>
+            </div>
+        </div>
+        <button class="calculate-btn" onclick="calculateFortune()">🧮 测算今日运势</button>
+    </div>
+
+    <!-- 运势结果卡片 -->
+    <div class="fortune-result" id="fortuneResult">
+        <div class="result-header">
+            <div class="result-title" id="resultUserName">今日运势测算结果</div>
+            <div class="result-actions">
+                <button class="save-result-btn" onclick="saveFortuneResult()">保存结果</button>
+                <button class="share-result-btn" onclick="shareFortuneResult()">分享结果</button>
+            </div>
+        </div>
+
+        <!-- 运势趋势图 -->
+        <div class="fortune-chart">
+            <div class="chart-title">今日各时段运势趋势</div>
+            <canvas id="fortune-chart-canvas"></canvas>
+        </div>
+
+        <!-- 运势维度卡片 -->
+        <div class="fortune-dimensions" id="fortuneDimensions">
+            <!-- 动态生成维度卡片 -->
+        </div>
+
+        <!-- 详细解读 -->
+        <div class="fortune-details">
+            <div class="detail-title">八字命理解读</div>
+            <div class="detail-content" id="fortuneAnalysis">
+                <!-- 动态填充解读内容 -->
+            </div>
+        </div>
+
+        <!-- 开运建议 -->
+        <div class="luck-tips">
+            <div class="luck-tips-title">今日开运建议</div>
+            <ul class="luck-tips-list" id="luckTips">
+                <!-- 动态填充开运建议 -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- 引入脚本 -->
+    <script src="../js/theme-utils.js"></script>
+    <script>
+        // 页面加载完成后初始化
+        window.addEventListener('load', function() {
+            // 初始化模式切换
+            initThemeSwitch();
+            
+            // 默认设置出生日期为1990-01-01（示例）
+            document.getElementById('birthDate').value = '1990-01-01';
+        });
+
+        // 测算今日运势核心函数
+        function calculateFortune() {
+            // 获取表单数据
+            const userName = document.getElementById('userName').value || '有缘人';
+            const birthDate = document.getElementById('birthDate').value;
+            const birthHour = document.getElementById('birthHour').value;
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+
+            // 表单验证
+            if (!birthDate) {
+                alert('请输入出生日期！');
+                return;
+            }
+            if (!birthHour) {
+                alert('请选择出生时辰！');
+                return;
+            }
+
+            // 生成随机运势数据（模拟测算）
+            const fortuneData = generateFortuneData(userName, birthDate, birthHour, gender);
+            
+            // 显示结果卡片
+            const resultCard = document.getElementById('fortuneResult');
+            resultCard.style.display = 'block';
+            
+            // 更新标题
+            document.getElementById('resultUserName').textContent = `${userName}的今日运势测算结果`;
+            
+            // 绘制运势趋势图
+            drawFortuneChart(fortuneData.trend);
+            
+            // 生成维度卡片
+            generateDimensionCards(fortuneData.dimensions);
+            
+            // 填充详细解读
+            document.getElementById('fortuneAnalysis').innerHTML = fortuneData.analysis;
+            
+            // 填充开运建议
+            document.getElementById('luckTips').innerHTML = fortuneData.luckTips.map(tip => `<li>${tip}</li>`).join('');
+            
+            // 保存运势数据供后续使用
+            window.currentFortuneData = fortuneData;
+            window.currentFortuneUserInfo = {
+                name: userName,
+                birthDate: birthDate,
+                birthHour: birthHour,
+                gender: gender
+            };
+        }
+
+        // 生成随机运势数据（核心测算逻辑模拟）
+        function generateFortuneData(name, birthDate, birthHour, gender) {
+            // 运势维度定义
+            const dimensions = [
+                { name: '财运', key: 'wealth', score: Math.floor(Math.random() * 40) + 60 },
+                { name: '事业运', key: 'career', score: Math.floor(Math.random() * 40) + 60 },
+                { name: '健康运', key: 'health', score: Math.floor(Math.random() * 40) + 60 },
+                { name: '感情运', key: 'love', score: Math.floor(Math.random() * 40) + 60 },
+                { name: '贵人运', key: 'noble', score: Math.floor(Math.random() * 40) + 60 },
+                { name: '学业运', key: 'study', score: Math.floor(Math.random() * 40) + 60 }
+            ];
+
+            // 生成时段运势趋势
+            const timePeriods = ['凌晨', '上午', '中午', '下午', '晚上', '深夜'];
+            const trend = timePeriods.map(period => ({
+                period: period,
+                score: Math.floor(Math.random() * 30) + 70
+            }));
+
+            // 八字命理解读（根据随机分数生成）
+            const totalScore = dimensions.reduce((sum, dim) => sum + dim.score, 0) / dimensions.length;
+            let analysis = '';
+            
+            if (totalScore >= 90) {
+                analysis = `${name}您好！根据您的生辰八字测算，今日您的整体运势极佳（${totalScore.toFixed(1)}分）。命宫得贵人星照临，五行调和，诸事顺遂。您的八字中${gender === 'male' ? '乾造' : '坤造'}为${getRandomBazi()}，今日天干地支为${getTodayGanZhi()}，相生相合，是难得的吉日。适合开展重要项目、洽谈合作、投资理财，成功概率极高。感情方面也有意外惊喜，单身者有邂逅良缘的机会，已婚者家庭和睦。健康方面状态良好，只需注意劳逸结合即可。`;
+            } else if (totalScore >= 80) {
+                analysis = `${name}您好！根据您的生辰八字测算，今日您的整体运势良好（${totalScore.toFixed(1)}分）。命宫有吉星相助，五行基本调和，大部分事情都能顺利进行。您的八字中${gender === 'male' ? '乾造' : '坤造'}为${getRandomBazi()}，今日天干地支为${getTodayGanZhi()}，虽有小冲但无大碍。事业上有晋升机会，财运平稳上升，适合稳健投资。感情运平顺，适合与伴侣沟通交流。健康方面需注意${totalScore > 85 ? '饮食清淡' : '作息规律'}。`;
+            } else if (totalScore >= 70) {
+                analysis = `${name}您好！根据您的生辰八字测算，今日您的整体运势一般（${totalScore.toFixed(1)}分）。命宫有小煞干扰，五行略有失衡，需谨慎行事。您的八字中${gender === 'male' ? '乾造' : '坤造'}为${getRandomBazi()}，今日天干地支为${getTodayGanZhi()}，有相克之象。事业上易遇小人，建议低调行事；财运普通，不宜大额投资；感情运平淡，避免争吵。健康方面需注意${totalScore > 75 ? '颈椎保护' : '肠胃调理'}。`;
+            } else {
+                analysis = `${name}您好！根据您的生辰八字测算，今日您的整体运势较差（${totalScore.toFixed(1)}分）。命宫犯煞，五行失调，需多加小心。您的八字中${gender === 'male' ? '乾造' : '坤造'}为${getRandomBazi()}，今日天干地支为${getTodayGanZhi()}，相冲相克，诸事不宜。建议今日以守为主，避免重大决策和投资；注意人际关系，避免口舌之争；健康方面需特别注意${totalScore > 65 ? '心血管' : '呼吸道'}问题，不宜过度劳累。`;
+            }
+
+            // 开运建议（根据分数动态生成）
+            const luckTips = [];
+            if (totalScore >= 90) {
+                luckTips.push('今日宜穿红色/金色衣物，增强运势');
+                luckTips.push('可佩戴黄金饰品，提升财运');
+                luckTips.push('上午9-11点开展重要事务，成功率最高');
+                luckTips.push('向东方出行，遇贵人相助');
+                luckTips.push('多食红色水果，增强火气助运');
+            } else if (totalScore >= 80) {
+                luckTips.push('今日宜穿黄色/棕色衣物，稳定气场');
+                luckTips.push('佩戴玉石饰品，调和五行');
+                luckTips.push('避免下午3-5点做重要决策');
+                luckTips.push('家中摆放绿植，增强生气');
+                luckTips.push('保持心态平和，避免急躁');
+            } else if (totalScore >= 70) {
+                luckTips.push('今日宜穿黑色/蓝色衣物，化解煞气');
+                luckTips.push('佩戴黑曜石饰品，辟邪挡煞');
+                luckTips.push('避免大额消费和投资');
+                luckTips.push('家中点檀香，净化气场');
+                luckTips.push('多喝温水，调和身体');
+            } else {
+                luckTips.push('今日宜穿白色/银色衣物，化解不利');
+                luckTips.push('佩戴白水晶饰品，净化负能量');
+                luckTips.push('尽量避免外出和社交活动');
+                luckTips.push('家中摆放五帝钱，化解煞气');
+                luckTips.push('早休息，保证充足睡眠');
+            }
+
+            return {
+                dimensions: dimensions,
+                trend: trend,
+                analysis: analysis,
+                luckTips: luckTips,
+                totalScore: totalScore
+            };
+        }
+
+        // 绘制运势趋势图
+        function drawFortuneChart(trendData) {
+            const canvas = document.getElementById('fortune-chart-canvas');
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            
+            // 适配高清屏
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            // 清空画布
+            ctx.clearRect(0, 0, rect.width, rect.height);
+
+            // 图表参数
+            const padding = 30;
+            const width = rect.width - 2 * padding;
+            const height = rect.height - 2 * padding;
+            const pointCount = trendData.length;
+            const pointWidth = width / (pointCount - 1);
+
+            // 绘制背景网格
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            
+            // 水平网格线
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + i * height / 5;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(padding + width, y);
+                ctx.stroke();
+                
+                // 数值标签
+                const value = 100 - i * 20;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.font = '12px SimHei';
+                ctx.textAlign = 'right';
+                ctx.fillText(value, padding - 5, y + 4);
+            }
+
+            // 绘制坐标轴
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)';
+            ctx.lineWidth = 2;
+            
+            // 横轴
+            ctx.beginPath();
+            ctx.moveTo(padding, padding + height);
+            ctx.lineTo(padding + width, padding + height);
+            ctx.stroke();
+            
+            // 纵轴
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, padding + height);
+            ctx.stroke();
+
+            // 绘制趋势线
+            ctx.beginPath();
+            trendData.forEach((item, index) => {
+                const x = padding + index * pointWidth;
+                const y = padding + height - (item.score / 100) * height;
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+
+                // 绘制数据点
+                ctx.fillStyle = item.score >= 90 ? '#c8102e' : item.score >= 80 ? '#ffd700' : '#228b22';
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 时段标签
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.font = '14px SimHei';
+                ctx.textAlign = 'center';
+                ctx.fillText(item.period, x, padding + height + 20);
+                
+                // 分数标签
+                ctx.fillStyle = item.score >= 90 ? '#c8102e' : item.score >= 80 ? '#ffd700' : '#228b22';
+                ctx.fillText(item.score, x, y - 10);
+            });
+
+            // 绘制趋势线
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // 填充区域
+            ctx.fillStyle = 'rgba(200, 16, 46, 0.2)';
+            ctx.lineTo(padding + (pointCount - 1) * pointWidth, padding + height);
+            ctx.lineTo(padding, padding + height);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // 生成维度卡片
+        function generateDimensionCards(dimensions) {
+            const container = document.getElementById('fortuneDimensions');
+            container.innerHTML = '';
+            
+            dimensions.forEach(dim => {
+                // 确定分数颜色
+                let scoreColor = '';
+                if (dim.score >= 90) scoreColor = '#c8102e'; // 红
+                else if (dim.score >= 80) scoreColor = '#ffd700'; // 金
+                else if (dim.score >= 70) scoreColor = '#228b22'; // 绿
+                else scoreColor = '#1e90ff'; // 蓝
+
+                // 生成维度描述
+                let desc = '';
+                switch(dim.key) {
+                    case 'wealth':
+                        desc = dim.score >= 90 ? '财运亨通，偏财正财皆旺，适合投资理财' :
+                               dim.score >= 80 ? '财运平稳，小有进账，可稳健投资' :
+                               dim.score >= 70 ? '财运普通，宜守不宜攻，避免大额支出' :
+                               '财运低迷，易有破财风险，谨慎消费';
+                        break;
+                    case 'career':
+                        desc = dim.score >= 90 ? '事业运极佳，有晋升机会，贵人相助' :
+                               dim.score >= 80 ? '事业运良好，工作顺利，小有成就' :
+                               dim.score >= 70 ? '事业运一般，易遇小人，需低调行事' :
+                               '事业运不佳，易有挫折，以守为主';
+                        break;
+                    case 'health':
+                        desc = dim.score >= 90 ? '健康运极佳，精力充沛，无病无灾' :
+                               dim.score >= 80 ? '健康运良好，身体状态佳，只需日常保养' :
+                               dim.score >= 70 ? '健康运一般，需注意'+(dim.score>75?'颈椎':'肠胃')+'问题' :
+                               '健康运较差，易生病痛，需特别注意休息';
+                        break;
+                    case 'love':
+                        desc = dim.score >= 90 ? '感情运极佳，单身者遇良缘，已婚者感情升温' :
+                               dim.score >= 80 ? '感情运良好，沟通顺畅，关系和谐' :
+                               dim.score >= 70 ? '感情运平淡，避免争吵，多些包容' :
+                               '感情运不佳，易有矛盾，保持冷静';
+                        break;
+                    case 'noble':
+                        desc = dim.score >= 90 ? '贵人运爆棚，处处遇贵人，事半功倍' :
+                               dim.score >= 80 ? '贵人运良好，有朋友相助，解决困难' :
+                               dim.score >= 70 ? '贵人运一般，需主动寻求帮助' :
+                               '贵人运不佳，凡事靠自己，避免依赖他人';
+                        break;
+                    case 'study':
+                        desc = dim.score >= 90 ? '学业运极佳，思维敏捷，学习效率高' :
+                               dim.score >= 80 ? '学业运良好，记忆力佳，适合学习新知识' :
+                               dim.score >= 70 ? '学业运一般，注意力不集中，需调整状态' :
+                               '学业运不佳，思维迟钝，不宜重要考试';
+                        break;
+                }
+
+                // 创建卡片元素
+                const card = document.createElement('div');
+                card.className = 'dimension-card';
+                card.innerHTML = `
+                    <div class="dimension-title">
+                        ${dim.name}
+                        <span class="dimension-score" style="background-color: ${scoreColor}">${dim.score}分</span>
+                    </div>
+                    <div class="dimension-desc">${desc}</div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // 保存运势结果
+        function saveFortuneResult() {
+            if (!window.currentFortuneData || !window.currentFortuneUserInfo) {
+                alert('请先完成运势测算后再保存！');
+                return;
+            }
+
+            // 构造保存数据
+            const resultData = {
+                userInfo: window.currentFortuneUserInfo,
+                totalScore: window.currentFortuneData.totalScore,
+                dimensions: window.currentFortuneData.dimensions,
+                analysis: window.currentFortuneData.analysis,
+                luckTips: window.currentFortuneData.luckTips,
+                time: new Date().toLocaleString()
+            };
+
+            // 保存到本地存储
+            const fortuneResults = JSON.parse(localStorage.getItem('fortuneResults') || '[]');
+            fortuneResults.push(resultData);
+            // 只保留最近5条结果
+            const latestResults = fortuneResults.slice(-5);
+            localStorage.setItem('fortuneResults', JSON.stringify(latestResults));
+
+            alert(`✅ ${window.currentFortuneUserInfo.name}的今日运势已保存！可在"我的"页面查看`);
+        }
+
+        // 分享运势结果
+        function shareFortuneResult() {
+            if (!window.currentFortuneData || !window.currentFortuneUserInfo) {
+                alert('请先完成运势测算后再分享！');
+                return;
+            }
+
+            // 构造分享文本
+            const userName = window.currentFortuneUserInfo.name;
+            const totalScore = window.currentFortuneData.totalScore.toFixed(1);
+            const wealthScore = window.currentFortuneData.dimensions.find(d => d.key === 'wealth').score;
+            const careerScore = window.currentFortuneData.dimensions.find(d => d.key === 'career').score;
+            
+            const shareText = `${userName}的今日运势报告：
+整体评分：${totalScore}分
+财运：${wealthScore}分 | 事业运：${careerScore}分
+
+${window.currentFortuneData.analysis.substring(0, 150)}...
+
+更多开运建议请查看赛博罗盘小程序`;
+
+            // 复制到剪贴板
+            navigator.clipboard.writeText(shareText).then(() => {
+                alert('📋 运势结果已复制到剪贴板，可分享到微信/朋友圈等平台');
+            }).catch(() => {
+                alert('复制失败，请手动复制：\n' + shareText);
+            });
+        }
+
+        // 辅助函数：生成随机八字
+        function getRandomBazi() {
+            const tianGan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+            const diZhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+            
+            const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+            
+            return `${getRandom(tianGan)}${getRandom(diZhi)} ${getRandom(tianGan)}${getRandom(diZhi)} ${getRandom(tianGan)}${getRandom(diZhi)} ${getRandom(tianGan)}${getRandom(diZhi)}`;
+        }
+
+        // 辅助函数：获取今日干支
+        function getTodayGanZhi() {
+            const tianGan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+            const diZhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+            
+            // 简单模拟今日干支（实际需根据万年历计算）
+            const today = new Date();
+            const ganIndex = today.getDate() % 10;
+            const zhiIndex = today.getDate() % 12;
+            
+            return `${tianGan[ganIndex]}${diZhi[zhiIndex]}`;
+        }
+    </script>
+</body>
+</html>
