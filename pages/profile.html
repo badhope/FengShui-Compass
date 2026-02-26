@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>个人中心 · 我的测算记录 - 国风玄易</title>
+    <style>
+        /* 全局变量与基础样式（保持风格统一） */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "SimHei", "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+        :root {
+            /* 国风主色调 */
+            --color-black: #0a0a0a; /* 玄黑 */
+            --color-red: #c8102e; /* 朱砂红 */
+            --color-gold: #ffd700; /* 鎏金 */
+            --color-green: #228b22; /* 青黛绿 */
+            --color-blue: #1e90ff; /* 水蓝 */
+            --color-gray-light: #e0e0e0; /* 浅灰 */
+            --color-gray-dark: #333; /* 深灰 */
+            
+            /* 年轻模式变量 */
+            --font-size-base: 16px;
+            --font-size-title: 20px;
+            --font-size-subtitle: 18px;
+            --button-size: 44px;
+            --card-padding: 20px;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* 长辈模式变量 */
+            --elder-font-base: 32px;
+            --elder-font-title: 36px;
+            --elder-font-subtitle: 34px;
+            --elder-button-size: 80px;
+            --elder-card-padding: 35px;
+            --elder-border-radius: 20px;
+        }
+        .elder-mode {
+            --font-size-base: var(--elder-font-base);
+            --font-size-title: var(--elder-font-title);
+            --font-size-subtitle: var(--elder-font-subtitle);
+            --button-size: var(--elder-button-size);
+            --card-padding: var(--elder-card-padding);
+            --border-radius: var(--elder-border-radius);
+            --shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+        }
+        body {
+            background-color: var(--color-black);
+            color: #fff;
+            background-image: radial-gradient(circle at 50% 50%, rgba(34, 139, 34, 0.08) 0%, rgba(200, 16, 46, 0.05) 90%);
+            min-height: 100vh;
+            padding-bottom: 60px;
+            transition: var(--transition);
+        }
+
+        /* 头部导航（返回+模式切换） */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 5%;
+            border-bottom: 2px solid rgba(200, 16, 46, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(200, 16, 46, 0.8);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: var(--font-size-base);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .back-btn:hover {
+            background: var(--color-gold);
+            color: var(--color-black);
+            transform: scale(1.05);
+        }
+        .theme-switch {
+            width: var(--button-size);
+            height: var(--button-size);
+            border: none;
+            border-radius: 50%;
+            background-color: rgba(200, 16, 46, 0.8);
+            color: #fff;
+            font-size: calc(var(--font-size-base) - 4px);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .theme-switch:hover {
+            background-color: var(--color-gold);
+            color: var(--color-black);
+            transform: scale(1.05);
+        }
+
+        /* 页面标题 */
+        .page-title {
+            text-align: center;
+            font-size: var(--font-size-title);
+            color: var(--color-gold);
+            margin: 30px 0;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* 个人信息卡片 */
+        .profile-card {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto 50px;
+            padding: var(--card-padding);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(200, 16, 46, 0.1));
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: var(--border-radius);
+            position: relative;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .avatar-container {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--color-gold);
+        }
+        .avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: linear-gradient(135deg, var(--color-red), var(--color-gold));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #fff;
+        }
+        .profile-info {
+            flex: 1;
+        }
+        .user-name {
+            font-size: var(--font-size-subtitle);
+            color: var(--color-gold);
+            margin-bottom: 10px;
+        }
+        .user-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: var(--font-size-base);
+            color: var(--color-red);
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: calc(var(--font-size-base) - 2px);
+            color: var(--color-gray-light);
+        }
+        .edit-profile-btn {
+            padding: 8px 20px;
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--color-gold);
+            border: 1px solid var(--color-gold);
+            border-radius: 50px;
+            font-size: calc(var(--font-size-base) - 2px);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .edit-profile-btn:hover {
+            background: var(--color-gold);
+            color: var(--color-black);
+        }
+
+        /* 标签页切换 */
+        .tabs-container {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            position: relative;
+            z-index: 5;
+        }
+        .tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 50px;
+            padding: 5px;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px 0;
+            font-size: var(--font-size-base);
+            color: var(--color-gray-light);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .tab.active {
+            background: linear-gradient(135deg, var(--color-red), var(--color-gold));
+            color: var(--color-black);
+            font-weight: bold;
+        }
+
+        /* 记录列表容器 */
+        .records-container {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto 50px;
+            position: relative;
+            z-index: 5;
+        }
+        .record-empty {
+            text-align: center;
+            padding: 50px 0;
+            color: var(--color-gray-light);
+            font-size: var(--font-size-base);
+        }
+        .record-list {
+            list-style: none;
+        }
+        .record-item {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(200, 16, 46, 0.1));
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: var(--border-radius);
+            padding: var(--card-padding);
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+        .record-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+            border-color: var(--color-gold);
+        }
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+        .record-title {
+            font-size: var(--font-size-base);
+            color: var(--color-gold);
+            font-weight: bold;
+        }
+        .record-time {
+            font-size: calc(var(--font-size-base) - 2px);
+            color: var(--color-gray-light);
+        }
+        .record-content {
+            font-size: var(--font-size-base);
+            color: var(--color-gray-light);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .record-score {
+            display: inline-block;
+            padding: 5px 10px;
+            background: var(--color-red);
+            border-radius: 50px;
+            font-size: calc(var(--font-size-base) - 2px);
+            margin-bottom: 15px;
+        }
+        .record-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .record-btn {
+            padding: 5px 15px;
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--color-gold);
+            border: 1px solid var(--color-gold);
+            border-radius: 50px;
+            font-size: calc(var(--font-size-base) - 4px);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .record-btn:hover {
+            background: var(--color-gold);
+            color: var(--color-black);
+        }
+
+        /* 设置区域 */
+        .settings-section {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--card-padding);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(200, 16, 46, 0.1));
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: var(--border-radius);
+            position: relative;
+            z-index: 5;
+        }
+        .settings-title {
+            font-size: var(--font-size-subtitle);
+            color: var(--color-gold);
+            margin-bottom: 25px;
+        }
+        .settings-list {
+            list-style: none;
+        }
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+        .settings-label {
+            font-size: var(--font-size-base);
+            color: var(--color-gray-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .settings-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-red);
+            font-size: 20px;
+        }
+        .settings-action {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .settings-btn {
+            padding: 8px 20px;
+            background: rgba(200, 16, 46, 0.6);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: calc(var(--font-size-base) - 2px);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .settings-btn:hover {
+            background: var(--color-gold);
+            color: var(--color-black);
+        }
+
+        /* 开关组件 */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 30px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--color-red);
+        }
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .profile-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            .user-stats {
+                justify-content: center;
+            }
+            .record-actions {
+                flex-direction: column;
+            }
+            .record-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header>
+        <button class="back-btn" onclick="window.location.href='../index.html'">
+            ← 返回首页
+        </button>
+        <button class="theme-switch" id="themeSwitch">长辈</button>
+    </header>
+
+    <!-- 页面标题 -->
+    <h1 class="page-title">个人中心 · 我的测算记录</h1>
+
+    <!-- 个人信息卡片 -->
+    <div class="profile-card">
+        <div class="avatar-container">
+            <div class="avatar" id="userAvatar">玄</div>
+        </div>
+        <div class="profile-info">
+            <div class="user-name" id="displayName">玄易居士</div>
+            <div class="user-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="compassCount">0</div>
+                    <div class="stat-label">罗盘测算</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="houseCount">0</div>
+                    <div class="stat-label">家居测算</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="fortuneCount">0</div>
+                    <div class="stat-label">运势测算</div>
+                </div>
+            </div>
+            <button class="edit-profile-btn" onclick="editProfile()">编辑个人信息</button>
+        </div>
+    </div>
+
+    <!-- 标签页切换 -->
+    <div class="tabs-container">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('all')">全部记录</div>
+            <div class="tab" onclick="switchTab('compass')">罗盘测算</div>
+            <div class="tab" onclick="switchTab('house')">家居风水</div>
+            <div class="tab" onclick="switchTab('fortune')">今日运势</div>
+        </div>
+    </div>
+
+    <!-- 记录列表容器 -->
+    <div class="records-container" id="recordsContainer">
+        <div class="record-empty" id="emptyTip">
+            📜 暂无测算记录<br>快去首页开始您的风水测算之旅吧！
+        </div>
+        <ul class="record-list" id="recordList">
+            <!-- 动态生成记录列表 -->
+        </ul>
+    </div>
+
+    <!-- 设置区域 -->
+    <div class="settings-section">
+        <h3 class="settings-title">系统设置</h3>
+        <ul class="settings-list">
+            <li class="settings-item">
+                <div class="settings-label">
+                    <span class="settings-icon">🔊</span>
+                    语音播报
+                </div>
+                <div class="settings-action">
+                    <label class="switch">
+                        <input type="checkbox" id="voiceSwitch" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </li>
+            <li class="settings-item">
+                <div class="settings-label">
+                    <span class="settings-icon">🌙</span>
+                    深色模式
+                </div>
+                <div class="settings-action">
+                    <label class="switch">
+                        <input type="checkbox" id="darkModeSwitch" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </li>
+            <li class="settings-item">
+                <div class="settings-label">
+                    <span class="settings-icon">🧹</span>
+                    清除所有记录
+                </div>
+                <div class="settings-action">
+                    <button class="settings-btn" onclick="clearAllRecords()">清除记录</button>
+                </div>
+            </li>
+            <li class="settings-item">
+                <div class="settings-label">
+                    <span class="settings-icon">ℹ️</span>
+                    关于我们
+                </div>
+                <div class="settings-action">
+                    <button class="settings-btn" onclick="showAbout()">关于</button>
+                </div>
+            </li>
+            <li class="settings-item">
+                <div class="settings-label">
+                    <span class="settings-icon">📞</span>
+                    联系客服
+                </div>
+                <div class="settings-action">
+                    <button class="settings-btn" onclick="contactService()">客服</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 引入脚本 -->
+    <script src="../js/theme-utils.js"></script>
+    <script>
+        // 页面加载完成后初始化
+        window.addEventListener('load', function() {
+            // 初始化模式切换
+            initThemeSwitch();
+            // 加载用户信息
+            loadUserInfo();
+            // 加载所有记录
+            loadAllRecords();
+            // 初始化设置项
+            initSettings();
+        });
+
+        // 加载用户信息
+        function loadUserInfo() {
+            // 从本地存储获取用户信息
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{"name":"玄易居士","avatar":"玄"}');
+            
+            // 更新页面显示
+            document.getElementById('displayName').textContent = userInfo.name;
+            document.getElementById('userAvatar').textContent = userInfo.avatar || userInfo.name.substring(0, 1);
+            
+            // 统计各类记录数量
+            const compassCount = JSON.parse(localStorage.getItem('fengshuiResults') || '[]').length;
+            const houseCount = JSON.parse(localStorage.getItem('houseFengshuiResults') || '[]').length;
+            const fortuneCount = JSON.parse(localStorage.getItem('fortuneResults') || '[]').length;
+            
+            document.getElementById('compassCount').textContent = compassCount;
+            document.getElementById('houseCount').textContent = houseCount;
+            document.getElementById('fortuneCount').textContent = fortuneCount;
+        }
+
+        // 切换标签页
+        function switchTab(tabType) {
+            // 更新标签样式
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // 找到当前标签并激活
+            Array.from(tabs).forEach(tab => {
+                if (tab.getAttribute('onclick').includes(tabType)) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // 加载对应类型的记录
+            loadRecordsByType(tabType);
+        }
+
+        // 加载所有记录
+        function loadAllRecords() {
+            loadRecordsByType('all');
+        }
+
+        // 根据类型加载记录
+        function loadRecordsByType(type) {
+            // 获取所有记录
+            const compassRecords = JSON.parse(localStorage.getItem('fengshuiResults') || '[]');
+            const houseRecords = JSON.parse(localStorage.getItem('houseFengshuiResults') || '[]');
+            const fortuneRecords = JSON.parse(localStorage.getItem('fortuneResults') || '[]');
+            
+            // 合并并排序所有记录
+            let allRecords = [];
+            
+            // 处理罗盘记录
+            compassRecords.forEach(record => {
+                allRecords.push({
+                    type: 'compass',
+                    title: '罗盘风水测算',
+                    time: record.time,
+                    content: `方位角度：${record.rotation}°<br>${record.content.substring(0, 100)}...`,
+                    score: '',
+                    data: record
+                });
+            });
+            
+            // 处理家居风水记录
+            houseRecords.forEach(record => {
+                allRecords.push({
+                    type: 'house',
+                    title: `${record.area}风水测算`,
+                    time: record.time,
+                    content: `风水评分：${record.score}分<br>${record.content.substring(0, 100)}...`,
+                    score: record.score + '分',
+                    data: record
+                });
+            });
+            
+            // 处理运势记录
+            fortuneRecords.forEach(record => {
+                allRecords.push({
+                    type: 'fortune',
+                    title: `${record.userInfo.name || '有缘人'}的今日运势`,
+                    time: record.time,
+                    content: `整体评分：${record.totalScore.toFixed(1)}分<br>${record.analysis.substring(0, 100)}...`,
+                    score: record.totalScore.toFixed(1) + '分',
+                    data: record
+                });
+            });
+            
+            // 按时间倒序排序
+            allRecords.sort((a, b) => new Date(b.time) - new Date(a.time));
+            
+            // 根据类型筛选
+            let filteredRecords = allRecords;
+            if (type !== 'all') {
+                filteredRecords = allRecords.filter(record => record.type === type);
+            }
+            
+            // 更新页面显示
+            const recordList = document.getElementById('recordList');
+            const emptyTip = document.getElementById('emptyTip');
+            
+            if (filteredRecords.length === 0) {
+                // 显示空提示
+                emptyTip.style.display = 'block';
+                recordList.innerHTML = '';
+            } else {
+                // 隐藏空提示
+                emptyTip.style.display = 'none';
+                
+                // 生成记录列表
+                recordList.innerHTML = '';
+                filteredRecords.forEach((record, index) => {
+                    // 确定分数颜色
+                    let scoreColor = '';
+                    if (record.score) {
+                        const scoreNum = parseFloat(record.score);
+                        if (scoreNum >= 90) scoreColor = '#c8102e';
+                        else if (scoreNum >= 80) scoreColor = '#ffd700';
+                        else if (scoreNum >= 70) scoreColor = '#228b22';
+                        else scoreColor = '#1e90ff';
+                    }
+                    
+                    // 创建记录项
+                    const recordItem = document.createElement('li');
+                    recordItem.className = 'record-item';
+                    recordItem.innerHTML = `
+                        <div class="record-header">
+                            <div class="record-title">${record.title}</div>
+                            <div class="record-time">${record.time}</div>
+                        </div>
+                        ${record.score ? `<div class="record-score" style="background-color: ${scoreColor}">${record.score}</div>` : ''}
+                        <div class="record-content">${record.content}</div>
+                        <div class="record-actions">
+                            <button class="record-btn" onclick="viewRecordDetail('${record.type}', ${index})">查看详情</button>
+                            <button class="record-btn" onclick="deleteRecord('${record.type}', ${index})">删除</button>
+                        </div>
+                    `;
+                    
+                    recordList.appendChild(recordItem);
+                });
+            }
+        }
+
+        // 查看记录详情
+        function viewRecordDetail(type, index) {
+            let records = [];
+            
+            // 根据类型获取对应记录
+            switch(type) {
+                case 'compass':
+                    records = JSON.parse(localStorage.getItem('fengshuiResults') || '[]');
+                    break;
+                case 'house':
+                    records = JSON.parse(localStorage.getItem('houseFengshuiResults') || '[]');
+                    break;
+                case 'fortune':
+                    records = JSON.parse(localStorage.getItem('fortuneResults') || '[]');
+                    break;
+            }
+            
+            if (index >= 0 && index < records.length) {
+                const record = records[index];
+                
+                // 构造详情文本
+                let detailText = '';
+                
+                if (type === 'compass') {
+                    detailText = `
+【罗盘风水测算详情】
+测算时间：${record.time}
+方位角度：${record.rotation}°
+详细解读：
+${record.content.replace(/<[^>]*>/g, '')}
+
+温馨提示：本测算结果基于传统风水理论，仅供参考。
+                    `;
+                } else if (type === 'house') {
+                    detailText = `
+【${record.area}风水测算详情】
+测算时间：${record.time}
+风水评分：${record.score}分
+详细解读：
+${record.content.replace(/<[^>]*>/g, '')}
+
+温馨提示：家居风水调整建议可根据自身情况选择性采纳。
+                    `;
+                } else if (type === 'fortune') {
+                    detailText = `
+【${record.userInfo.name || '有缘人'}的今日运势详情】
+测算时间：${record.time}
+整体评分：${record.totalScore.toFixed(1)}分
+
+基本信息：
+姓名：${record.userInfo.name || '未填写'}
+出生日期：${record.userInfo.birthDate || '未填写'}
+出生时辰：${record.userInfo.birthHour || '未填写'}
+性别：${record.userInfo.gender === 'male' ? '男' : '女'}
+
+各维度评分：
+${record.dimensions.map(d => `${d.name}：${d.score}分`).join('\n')}
+
+八字命理解读：
+${record.analysis.replace(/<[^>]*>/g, '')}
+
+今日开运建议：
+${record.luckTips.map((tip, i) => `${i+1}. ${tip}`).join('\n')}
+
+温馨提示：运势测算仅供娱乐参考，生活仍需努力前行。
+                    `;
+                }
+                
+                // 显示详情弹窗
+                alert(detailText);
+            } else {
+                alert('该记录不存在或已被删除！');
+            }
+        }
+
+        // 删除单条记录
+        function deleteRecord(type, index) {
+            if (!confirm('确定要删除这条记录吗？删除后无法恢复！')) {
+                return;
+            }
+            
+            let records = [];
+            let storageKey = '';
+            
+            // 根据类型获取对应记录和存储键
+            switch(type) {
+                case 'compass':
+                    storageKey = 'fengshuiResults';
+                    records = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                    break;
+                case 'house':
+                    storageKey = 'houseFengshuiResults';
+                    records = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                    break;
+                case 'fortune':
+                    storageKey = 'fortuneResults';
+                    records = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                    break;
+            }
+            
+            // 删除指定索引的记录
+            if (index >= 0 && index < records.length) {
+                records.splice(index, 1);
+                localStorage.setItem(storageKey, JSON.stringify(records));
+                
+                // 重新加载记录
+                loadAllRecords();
+                // 更新统计数字
+                loadUserInfo();
+                
+                alert('✅ 记录已成功删除！');
+            } else {
+                alert('删除失败：该记录不存在！');
+            }
+        }
+
+        // 编辑个人信息
+        function editProfile() {
+            // 获取当前用户信息
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{"name":"玄易居士","avatar":"玄"}');
+            
+            // 弹窗输入新信息
+            const newName = prompt('请输入您的昵称：', userInfo.name);
+            if (newName && newName.trim()) {
+                // 获取头像字符（取第一个字）
+                const newAvatar = newName.substring(0, 1);
+                
+                // 保存到本地存储
+                const updatedInfo = {
+                    name: newName.trim(),
+                    avatar: newAvatar
+                };
+                localStorage.setItem('userInfo', JSON.stringify(updatedInfo));
+                
+                // 更新页面显示
+                document.getElementById('displayName').textContent = newName.trim();
+                document.getElementById('userAvatar').textContent = newAvatar;
+                
+                alert('✅ 个人信息已更新！');
+            }
+        }
+
+        // 初始化设置项
+        function initSettings() {
+            // 深色模式开关（默认开启）
+            document.getElementById('darkModeSwitch').addEventListener('change', function() {
+                if (this.checked) {
+                    document.body.style.backgroundColor = 'var(--color-black)';
+                    document.body.style.color = '#fff';
+                } else {
+                    document.body.style.backgroundColor = '#fff';
+                    document.body.style.color = '#000';
+                }
+            });
+            
+            // 语音播报开关
+            document.getElementById('voiceSwitch').addEventListener('change', function() {
+                localStorage.setItem('voiceEnabled', this.checked);
+                alert(this.checked ? '✅ 语音播报已开启' : '❌ 语音播报已关闭');
+            });
+        }
+
+        // 清除所有记录
+        function clearAllRecords() {
+            if (!confirm('⚠️ 确定要清除所有测算记录吗？此操作不可恢复！')) {
+                return;
+            }
+            
+            // 清除所有记录存储
+            localStorage.removeItem('fengshuiResults');
+            localStorage.removeItem('houseFengshuiResults');
+            localStorage.removeItem('fortuneResults');
+            localStorage.removeItem('fullHouseReports');
+            
+            // 重新加载记录（显示空状态）
+            loadAllRecords();
+            // 更新统计数字
+            loadUserInfo();
+            
+            alert('✅ 所有测算记录已清除！');
+        }
+
+        // 显示关于我们
+        function showAbout() {
+            alert(`
+【赛博罗盘 - 国风玄易】
+版本：v1.0.0
+开发者：玄易工作室
+更新时间：2026年2月
+
+✨ 产品介绍：
+赛博罗盘是一款融合传统风水文化与现代科技的测算工具，
+提供罗盘风水、家居风水、今日运势等多种测算功能，
+旨在为用户提供专业、有趣的风水文化体验。
+
+📖 免责声明：
+本应用所有测算结果仅供娱乐参考，不构成任何专业建议，
+请理性看待风水文化，切勿过度迷信。
+
+❤️ 感谢您的使用与支持！
+            `);
+        }
+
+        // 联系客服
+        function contactService() {
+            alert(`
+📞 客服联系方式：
+微信：cyxl123456
+电话：400-123-4567
+邮箱：service@cyxl.com
+工作时间：9:00-18:00（周一至周五）
+
+如有任何问题或建议，欢迎随时联系我们！
+            `);
+        }
+    </script>
+</body>
+</html>
