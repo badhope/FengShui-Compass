@@ -4,7 +4,7 @@
  */
 
 // 12生肖运势完整数据
-const zodiacFortuneData = [
+export const zodiacFortuneData = [
     {
         name: '鼠',
         fortune: {
@@ -272,7 +272,7 @@ const zodiacFortuneData = [
 ];
 
 // 12星座运势简化数据（新增）
-const constellationFortuneData = [
+export const constellationFortuneData = [
     { name: '白羊座', overall: '★★★★☆', suggest: '今日行动力强，适合开启新计划，忌冲动行事' },
     { name: '金牛座', overall: '★★★☆☆', suggest: '今日财运平稳，适合理财规划，忌贪小便宜' },
     { name: '双子座', overall: '★★★★☆', suggest: '今日沟通运佳，适合洽谈合作，忌言多必失' },
@@ -288,7 +288,7 @@ const constellationFortuneData = [
 ];
 
 // 今日通用运势数据（大幅丰富）
-const todayFortuneData = {
+export const todayFortuneData = {
     date: '癸卯年 甲寅月 乙未日',
     zodiac: '羊',
     luckyDirection: '正东（震位）',
@@ -306,22 +306,22 @@ const todayFortuneData = {
 };
 
 // 获取生肖运势
-function getZodiacFortune(zodiacName) {
+export function getZodiacFortune(zodiacName) {
     return zodiacFortuneData.find(item => item.name === zodiacName) || zodiacFortuneData[0];
 }
 
 // 获取星座运势
-function getConstellationFortune(constellationName) {
+export function getConstellationFortune(constellationName) {
     return constellationFortuneData.find(item => item.name === constellationName) || constellationFortuneData[0];
 }
 
 // 获取今日通用运势
-function getTodayFortune() {
+export function getTodayFortune() {
     return todayFortuneData;
 }
 
 // 保存运势记录到本地存储（新增功能）
-function saveFortuneRecord(type, name, data) {
+export function saveFortuneRecord(type, name, data) {
     const records = JSON.parse(localStorage.getItem('fortuneRecords') || '[]');
     records.push({
         id: Date.now(),
@@ -337,12 +337,12 @@ function saveFortuneRecord(type, name, data) {
 }
 
 // 获取运势记录
-function getFortuneRecords() {
+export function getFortuneRecords() {
     return JSON.parse(localStorage.getItem('fortuneRecords') || '[]');
 }
 
 // 删除指定运势记录
-function deleteFortuneRecord(id) {
+export function deleteFortuneRecord(id) {
     let records = JSON.parse(localStorage.getItem('fortuneRecords') || '[]');
     records = records.filter(item => item.id !== id);
     localStorage.setItem('fortuneRecords', JSON.stringify(records));

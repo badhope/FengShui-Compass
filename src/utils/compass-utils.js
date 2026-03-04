@@ -2,7 +2,7 @@
  * 罗盘绘制与交互核心工具
  * 新增：五行标注、更细腻的旋转阻尼、角度实时显示、模式适配（长辈模式减弱动效）
  */
-function initCompass(canvasId, isInteractive = true) {
+export function initCompass(canvasId, isInteractive = true) {
     const canvas = document.getElementById(canvasId);
     const ctx = canvas.getContext('2d');
     const isElderMode = getCurrentTheme() === 'elder';
@@ -285,7 +285,7 @@ function initCompass(canvasId, isInteractive = true) {
 /**
  * 风水结果更新函数（大幅丰富解读内容）
  */
-function updateFengshuiResult() {
+export function updateFengshuiResult() {
     const resultEl = document.getElementById('fengshui-result');
     if (!resultEl) return;
 
@@ -381,10 +381,12 @@ function updateFengshuiResult() {
     `;
 }
 
-// 复用之前的主题判断函数（避免依赖缺失）
-function getCurrentTheme() {
+// 辅助函数：获取当前模式状态
+export function getCurrentTheme() {
     return localStorage.getItem('compassTheme') || 'youth';
 }
-function getAnimStatus() {
+
+// 辅助函数：获取动画状态
+export function getAnimStatus() {
     return localStorage.getItem('compassAnim') || 'on';
 }
